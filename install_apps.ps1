@@ -1,30 +1,16 @@
-#.\install_apps.ps1 -apps "Python", "Java", "Git" -versions "3.9.1", "1.8", "" -ide "Pycharm"
+#.\install_apps.ps1 -apps "Python", "Docker", "Git" -ide "Pycharm"
+
 
 param (
     [string[]]$apps,
-    [string[]]$versions,
     [string]$ide
 )
 
-function Install-App ($appName, $version) {
+function Install-App ($appName) {
     switch ($appName.ToLower()) {
-        "java" {
-            if ($version) {
-                Write-Output "Installing Java $version..."
-                winget install --id Microsoft.OpenJDK --version $version
-            } else {
-                Write-Output "Installing Java..."
-                winget install --id Microsoft.OpenJDK.17
-            }
-        }
         "python" {
-            if ($version) {
-                Write-Output "Installing Python $version..."
-                winget install --id Python.Python.3 --version $version
-            } else {
-                Write-Output "Installing Python..."
-                winget install --id Python.Python.3
-            }
+            Write-Output "Installing Python..."
+            winget install --id Python.Python.3
         }
         "docker" {
             Write-Output "Installing Docker..."
@@ -42,6 +28,12 @@ function Install-App ($appName, $version) {
             Write-Output "Installing WinSCP..."
             winget install --id WinSCP.WinSCP
         }
+        "google-sdk" {
+            Write-Output "Installing Google Cloud SDK..."
+            $installerPath = "$env:Temp\GoogleCloudSDKInstaller.exe"
+            (New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", $installerPath)
+            & $installerPath /S
+		}
         default {
             Write-Output "Application not recognized: $appName"
         }
@@ -60,17 +52,16 @@ function Update-Path ($pathToAdd) {
     }
 }
 
-for ($i = 0; $i -lt $apps.Length; $i++) {
-    Install-App $apps[$i] $versions[$i]
+# Install and update path for all apps
+foreach ($app in $apps) {
+    Install-App $app
 
-    switch ($apps[$i].ToLower()) {
+    switch ($app.ToLower()) {
         "java" {
-            $javaPath = "C:\Program Files\Microsoft\jdk-" + $versions[$i] + "\bin"
-            Update-Path $javaPath
+            Update-Path "C:\Program Files\Microsoft\jdk-17\bin"
         }
         "python" {
-            $pythonPath = "C:\Users\$env:UserName\AppData\Local\Programs\Python\Python" + $versions[$i].Replace(".", "")
-            Update-Path $pythonPath
+            Update-Path "C:\Users\$env:UserName\AppData\Local\Programs\Python\Python39"
         }
         "docker" {
             Update-Path "C:\Program Files\Docker\Docker\resources\bin"
@@ -87,26 +78,32 @@ for ($i = 0; $i -lt $apps.Length; $i++) {
     }
 }
 
+# Install and update path for the selected IDE
 switch ($ide.ToLower()) {
     "intellij" {
         Write-Output "Installing IntelliJ IDEA..."
         winget install --id JetBrains.IntelliJIDEA.Ultimate
-        $intellijPath = "C:\Program Files\JetBrains\IntelliJ IDEA 2023.1\bin"
-        Update-Path $intellijPath
+        Update-Path "C:\Program Files\JetBrains\IntelliJ IDEA 2023.1\bin"
     }
     "pycharm" {
         Write-Output "Installing PyCharm..."
         winget install --id JetBrains.PyCharm.Professional
-        $pycharmPath = "C:\Program Files\JetBrains\PyCharm 2023.1\bin"
-        Update-Path $pycharmPath
+        Update-Path "C:\Program Files\JetBrains\PyCharm 2023.1\bin"
     }
     "vscode" {
         Write-Output "Installing Visual Studio Code..."
         winget install --id Microsoft.VisualStudioCode
-        $vscodePath = "C:\Users\$env:UserName\AppData\Local\Programs\Microsoft VS Code\bin"
-        Update-Path $vscodePath
+        Update-Path "C:\Users\$env:UserName\AppData\Local\Programs\Microsoft VS Code\bin"
     }
     default {
         Write-Output "IDE not recognized. Please enter one of the following: IntelliJ, PyCharm, VSCode."
     }
 }
+
+# Install and update path for Google Cloud SDK by default
+Install-App "google-sdk"
+Update-Path "C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin"
+
+#Final output messages
+Write-Output "All selected applications and Google Cloud SDKs installed successfully."
+Write-Output "Restart your computer for the changes to take effect."

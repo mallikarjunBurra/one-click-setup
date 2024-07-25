@@ -12,7 +12,6 @@ New-Item -Path $logFile -ItemType "File"
 
 # Initialize installation status
 $installationSuccessful = $false
-$ideinstallationsucess = $false
 
 # Function to log messages to the log file
 function Log-Message ($message) {
@@ -119,7 +118,7 @@ switch ($ide.ToLower()) {
         winget install --id JetBrains.IntelliJIDEA.Ultimate
         if (Test-Path "C:\Program Files\JetBrains\IntelliJ IDEA 2023.1\bin\idea64.exe") {
             Update-Path "C:\Program Files\JetBrains\IntelliJ IDEA 2023.1\bin"
-			$global:ideinstallationsucess = $true
+			$global:installationSuccessful = $true
         } else {
             Log-Message "Failed to install IntelliJ IDEA."
         }
@@ -129,7 +128,7 @@ switch ($ide.ToLower()) {
         winget install --id JetBrains.PyCharm.Professional
         if (Test-Path "C:\Program Files\JetBrains\PyCharm 2023.1\bin\pycharm64.exe") {
             Update-Path "C:\Program Files\JetBrains\PyCharm 2023.1\bin"
-			$global:ideinstallationsucess = $true
+			$global:installationSuccessful = $true
         } else {
             Log-Message "Failed to install PyCharm."
         }
@@ -139,7 +138,7 @@ switch ($ide.ToLower()) {
         winget install --id Microsoft.VisualStudioCode
         if (Test-Path "C:\Users\$env:UserName\AppData\Local\Programs\Microsoft VS Code\bin\code.exe") {
             Update-Path "C:\Users\$env:UserName\AppData\Local\Programs\Microsoft VS Code\bin"
-			$global:ideinstallationsucess = $true
+			$global:installationSuccessful = $true
         } else {
             Log-Message "Failed to install Visual Studio Code."
         }
